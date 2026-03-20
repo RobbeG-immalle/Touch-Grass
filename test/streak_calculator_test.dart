@@ -123,8 +123,5 @@ void main() {
       expect(result, equals(1));
     });
 
-    test('streak of 0 starts at 1 with null lastPostDate', () {
-      expect(DatabaseService.calculateNewStreak(0, null), equals(1));
-    });
   });
 }

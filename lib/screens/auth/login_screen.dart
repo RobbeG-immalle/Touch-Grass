@@ -136,6 +136,8 @@ class _LoginScreenState extends State<LoginScreen> {
 }
 
 class _Logo extends StatelessWidget {
+  const _Logo({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -165,6 +167,8 @@ class _Logo extends StatelessWidget {
 }
 
 class _FirebaseWarning extends StatelessWidget {
+  const _FirebaseWarning({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(

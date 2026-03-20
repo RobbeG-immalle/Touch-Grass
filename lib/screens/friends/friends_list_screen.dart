@@ -165,6 +165,8 @@ class _PendingRequestTile extends StatelessWidget {
 }
 
 class _EmptyFriends extends StatelessWidget {
+  const _EmptyFriends({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Center(

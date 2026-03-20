@@ -83,6 +83,8 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _EmptyFeed extends StatelessWidget {
+  const _EmptyFeed({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Center(
