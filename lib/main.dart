@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:touch_grass/app.dart';
+import 'package:touch_grass/firebase_options.dart';
 import 'package:touch_grass/providers/auth_provider.dart';
 import 'package:touch_grass/providers/posts_provider.dart';
 import 'package:touch_grass/providers/friends_provider.dart';
@@ -13,9 +14,9 @@ Future<void> main() async {
 
   bool firebaseInitialized = false;
   try {
-    // Attempt to initialize Firebase. Requires firebase_options.dart to be
-    // generated via `flutterfire configure`. See firebase_options_template.dart.
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
     firebaseInitialized = true;
   } catch (_) {
     // Firebase config not present — app runs in demo/mock mode.

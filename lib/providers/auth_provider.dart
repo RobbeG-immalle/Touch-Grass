@@ -8,8 +8,8 @@ enum AuthStatus { initial, loading, authenticated, unauthenticated, error }
 
 class AuthProvider extends ChangeNotifier {
   final bool firebaseAvailable;
-  final AuthService _authService = AuthService();
-  final DatabaseService _db = DatabaseService();
+  late final AuthService _authService;
+  late final DatabaseService _db;
 
   AuthStatus _status = AuthStatus.initial;
   UserModel? _currentUser;
@@ -22,6 +22,8 @@ class AuthProvider extends ChangeNotifier {
 
   AuthProvider({required this.firebaseAvailable}) {
     if (firebaseAvailable) {
+      _authService = AuthService();
+      _db = DatabaseService();
       _authService.authStateChanges.listen(_onAuthChanged);
     } else {
       _status = AuthStatus.unauthenticated;
@@ -44,6 +46,13 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> signIn({required String email, required String password}) async {
+    if (!firebaseAvailable) {
+      _errorMessage = 'Firebase is not configured yet. Run flutterfire configure first.';
+      _status = AuthStatus.unauthenticated;
+      notifyListeners();
+      return false;
+    }
+
     _status = AuthStatus.loading;
     _errorMessage = null;
     notifyListeners();
@@ -63,6 +72,13 @@ class AuthProvider extends ChangeNotifier {
     required String password,
     required String username,
   }) async {
+    if (!firebaseAvailable) {
+      _errorMessage = 'Firebase is not configured yet. Run flutterfire configure first.';
+      _status = AuthStatus.unauthenticated;
+      notifyListeners();
+      return false;
+    }
+
     _status = AuthStatus.loading;
     _errorMessage = null;
     notifyListeners();
@@ -85,6 +101,13 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> signInWithGoogle() async {
+    if (!firebaseAvailable) {
+      _errorMessage = 'Firebase is not configured yet. Run flutterfire configure first.';
+      _status = AuthStatus.unauthenticated;
+      notifyListeners();
+      return false;
+    }
+
     _status = AuthStatus.loading;
     _errorMessage = null;
     notifyListeners();
@@ -116,10 +139,15 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
+    if (!firebaseAvailable) return;
     await _authService.signOut();
   }
 
   Future<bool> deleteAccount() async {
+    if (!firebaseAvailable) {
+      return false;
+    }
+
     try {
       if (_currentUser != null) {
         await _db.deleteUser(_currentUser!.uid);
@@ -132,6 +160,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void refreshUser() async {
+    if (!firebaseAvailable) return;
     final user = _authService.currentUser;
     if (user != null) {
       _currentUser = await _db.getUser(user.uid);
