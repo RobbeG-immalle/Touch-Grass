@@ -32,6 +32,10 @@ class _LoginScreenState extends State<LoginScreen> {
       password: _passwordCtrl.text,
     );
     if (!mounted) return;
+    if (ok) {
+      context.go('/home');
+      return;
+    }
     if (!ok && auth.errorMessage != null) {
       ScaffoldMessenger.of(
         context,
@@ -41,7 +45,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _googleSignIn() async {
     final auth = context.read<AuthProvider>();
-    await auth.signInWithGoogle();
+    final ok = await auth.signInWithGoogle();
+    if (!mounted) return;
+    if (ok) {
+      context.go('/home');
+      return;
+    }
+    if (auth.errorMessage != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(auth.errorMessage!)));
+    }
   }
 
   @override

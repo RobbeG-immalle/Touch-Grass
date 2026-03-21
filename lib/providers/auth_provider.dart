@@ -36,9 +36,33 @@ class AuthProvider extends ChangeNotifier {
       _status = AuthStatus.unauthenticated;
     } else {
       try {
-        _currentUser = await _db.getUser(user.uid);
+        final dbUser = await _db.getUser(user.uid);
+        _currentUser =
+            dbUser ??
+            UserModel(
+              uid: user.uid,
+              username: user.displayName ?? 'Grasser',
+              email: user.email ?? '',
+              avatarUrl: user.photoURL ?? '',
+              createdAt: DateTime.now(),
+            );
+
+        if (dbUser == null) {
+          try {
+            await _db.createUser(_currentUser!);
+          } catch (_) {
+            // If writes are blocked by rules, keep in-memory auth state valid.
+          }
+        }
         _status = AuthStatus.authenticated;
       } catch (_) {
+        _currentUser = UserModel(
+          uid: user.uid,
+          username: user.displayName ?? 'Grasser',
+          email: user.email ?? '',
+          avatarUrl: user.photoURL ?? '',
+          createdAt: DateTime.now(),
+        );
         _status = AuthStatus.authenticated;
       }
     }

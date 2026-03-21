@@ -36,6 +36,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       username: _usernameCtrl.text.trim(),
     );
     if (!mounted) return;
+    if (ok) {
+      context.go('/home');
+      return;
+    }
     if (!ok && auth.errorMessage != null) {
       ScaffoldMessenger.of(
         context,
