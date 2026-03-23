@@ -53,13 +53,13 @@ GOOGLE_MAPS_API_KEY=AIzaSy...your-key...
 
 **Android Setup:**
 
-Replace `YOUR_API_KEY` in `android/app/src/main/AndroidManifest.xml` (placeholder already present):
+Add your key to `android/local.properties` (this file is gitignored):
 
-```xml
-<meta-data
-    android:name="com.google.android.geo.API_KEY"
-    android:value="YOUR_GOOGLE_MAPS_API_KEY" />
+```properties
+MAPS_API_KEY=your_google_maps_api_key_here
 ```
+
+The app injects this value into the manifest via Gradle placeholder `${MAPS_API_KEY}`.
 
 **iOS Setup:**
 

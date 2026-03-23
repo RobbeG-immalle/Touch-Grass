@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:touch_grass/models/post_model.dart';
 import 'package:touch_grass/models/user_model.dart';
@@ -34,26 +35,50 @@ class PostsProvider extends ChangeNotifier {
     final user = _currentUser;
     if (user == null) return;
     final ids = [...user.friendIds, user.uid];
-    _db.feedStream(ids).listen((posts) {
-      _feed = posts;
-      notifyListeners();
-    });
+    _db.feedStream(ids).listen(
+      (posts) {
+        _feed = posts;
+        _error = null;
+        notifyListeners();
+      },
+      onError: _handleStreamError,
+    );
   }
 
   void _subscribeToUserPosts() {
     final uid = _currentUser?.uid;
     if (uid == null) return;
-    _db.userPostsStream(uid).listen((posts) {
-      _userPosts = posts;
-      notifyListeners();
-    });
+    _db.userPostsStream(uid).listen(
+      (posts) {
+        _userPosts = posts;
+        _error = null;
+        notifyListeners();
+      },
+      onError: _handleStreamError,
+    );
   }
 
   void subscribeToPublicPosts() {
-    _db.publicPostsStream().listen((posts) {
-      _publicPosts = posts;
-      notifyListeners();
-    });
+    _db.publicPostsStream().listen(
+      (posts) {
+        _publicPosts = posts;
+        _error = null;
+        notifyListeners();
+      },
+      onError: _handleStreamError,
+    );
+  }
+
+  void _handleStreamError(Object error) {
+    if (error is FirebaseException &&
+        error.code == 'failed-precondition' &&
+        (error.message?.toLowerCase().contains('index') ?? false)) {
+      _error =
+          'Feed query needs a Firestore index. Deploy firestore indexes and try again.';
+    } else {
+      _error = error.toString();
+    }
+    notifyListeners();
   }
 
   Future<bool> createPost({

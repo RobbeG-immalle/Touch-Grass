@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:touch_grass/config/constants.dart';
 import 'package:touch_grass/models/post_model.dart';
 import 'package:touch_grass/providers/posts_provider.dart';
+import 'package:touch_grass/services/location_service.dart';
 
 class ExploreMapScreen extends StatefulWidget {
   const ExploreMapScreen({super.key});
@@ -15,11 +16,19 @@ class ExploreMapScreen extends StatefulWidget {
 class _ExploreMapScreenState extends State<ExploreMapScreen> {
   GoogleMapController? _mapController;
   int _filterDays = 7; // 1 = Today, 7 = Week, 30 = Month
+  bool _myLocationEnabled = false;
 
   @override
   void initState() {
     super.initState();
     context.read<PostsProvider>().subscribeToPublicPosts();
+    _initLocationPermission();
+  }
+
+  Future<void> _initLocationPermission() async {
+    final enabled = await LocationService().ensurePermission();
+    if (!mounted) return;
+    setState(() => _myLocationEnabled = enabled);
   }
 
   Set<Marker> _buildMarkers(List<PostModel> posts) {
@@ -60,8 +69,8 @@ class _ExploreMapScreenState extends State<ExploreMapScreen> {
             ),
             onMapCreated: (c) => _mapController = c,
             markers: _buildMarkers(posts),
-            myLocationButtonEnabled: true,
-            myLocationEnabled: true,
+            myLocationButtonEnabled: _myLocationEnabled,
+            myLocationEnabled: _myLocationEnabled,
           ),
           Positioned(
             top: 12,

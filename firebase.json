@@ -1,1 +1,23 @@
-{"flutter":{"platforms":{"dart":{"lib/firebase_options.dart":{"projectId":"touchgrass-23a9a","configurations":{"android":"1:674287656702:android:163f631402417353e54faf","ios":"1:674287656702:ios:002ecde659ecb3fde54faf","web":"1:674287656702:web:7276d8bec2bc250ae54faf"}}}}}}
+{
+	"firestore": {
+		"rules": "firestore.rules",
+		"indexes": "firestore.indexes.json"
+	},
+	"storage": {
+		"rules": "storage.rules"
+	},
+	"flutter": {
+		"platforms": {
+			"dart": {
+				"lib/firebase_options.dart": {
+					"projectId": "touchgrass-23a9a",
+					"configurations": {
+						"android": "1:674287656702:android:163f631402417353e54faf",
+						"ios": "1:674287656702:ios:002ecde659ecb3fde54faf",
+						"web": "1:674287656702:web:7276d8bec2bc250ae54faf"
+					}
+				}
+			}
+		}
+	}
+}

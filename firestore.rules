@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users: readable by authenticated users, writable only by the owner
+    match /users/{uid} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == uid;
+      allow update, delete: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Posts: readable by authenticated users, writable only by the author
+    match /posts/{postId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null
+                    && (resource.data.userId == request.auth.uid
+                        // allow any authenticated user to update likedBy / likes
+                        || request.resource.data.diff(resource.data).affectedKeys()
+                             .hasOnly(['likedBy', 'likes']));
+      allow delete: if request.auth != null
+                    && resource.data.userId == request.auth.uid;
+    }
+
+    // Friendships: readable/writable by the two participants only
+    match /friendships/{friendshipId} {
+      allow read: if request.auth != null
+                  && (resource.data.user1 == request.auth.uid
+                      || resource.data.user2 == request.auth.uid);
+      allow create: if request.auth != null
+                    && (request.resource.data.user1 == request.auth.uid
+                        || request.resource.data.user2 == request.auth.uid);
+      allow update, delete: if request.auth != null
+                             && (resource.data.user1 == request.auth.uid
+                                 || resource.data.user2 == request.auth.uid);
+    }
+  }
+}
