@@ -121,7 +121,10 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           SliverToBoxAdapter(
-            child: PhotoGrid(posts: posts.userPosts),
+            child: PhotoGrid(
+              posts: posts.userPosts,
+              onPostTap: (post) => context.push('/post/${post.postId}'),
+            ),
           ),
         ],
       ),

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:touch_grass/config/constants.dart';
+import 'package:touch_grass/models/comment_model.dart';
 import 'package:touch_grass/models/friendship_model.dart';
 import 'package:touch_grass/models/post_model.dart';
 import 'package:touch_grass/models/user_model.dart';
@@ -204,6 +205,34 @@ class DatabaseService {
 
   Future<void> deletePost(String postId) async {
     await _db.collection(AppConstants.postsCollection).doc(postId).delete();
+  }
+
+  Stream<PostModel?> postStream(String postId) {
+    return _db
+        .collection(AppConstants.postsCollection)
+        .doc(postId)
+        .snapshots()
+        .map((doc) => doc.exists ? PostModel.fromFirestore(doc) : null);
+  }
+
+  // ── Comments ──────────────────────────────────────────────────────────────
+
+  Future<void> addComment(CommentModel comment) async {
+    await _db
+        .collection(AppConstants.commentsCollection)
+        .add(comment.toFirestore());
+  }
+
+  Stream<List<CommentModel>> commentsStream(String postId) {
+    return _db
+        .collection(AppConstants.commentsCollection)
+        .where('postId', isEqualTo: postId)
+        .orderBy('createdAt', descending: false)
+        .snapshots()
+        .map(
+          (snap) =>
+              snap.docs.map((d) => CommentModel.fromFirestore(d)).toList(),
+        );
   }
 
   // ── Streak ────────────────────────────────────────────────────────────────

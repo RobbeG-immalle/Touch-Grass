@@ -13,6 +13,7 @@ import 'package:touch_grass/screens/hot_pics/hot_pics_screen.dart';
 import 'package:touch_grass/screens/friends/friends_list_screen.dart';
 import 'package:touch_grass/screens/friends/add_friend_screen.dart';
 import 'package:touch_grass/screens/settings/settings_screen.dart';
+import 'package:touch_grass/screens/post/post_detail_screen.dart';
 
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -87,6 +88,13 @@ class AppRouter {
         path: '/settings',
         name: 'settings',
         builder: (_, __) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/post/:postId',
+        name: 'postDetail',
+        builder: (_, state) => PostDetailScreen(
+          postId: state.pathParameters['postId']!,
+        ),
       ),
     ],
   );

@@ -35,5 +35,14 @@ service cloud.firestore {
                              && (resource.data.user1 == request.auth.uid
                                  || resource.data.user2 == request.auth.uid);
     }
+
+    // Comments: readable by any authenticated user, writable by the author
+    match /comments/{commentId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null
+                             && resource.data.userId == request.auth.uid;
+    }
   }
 }

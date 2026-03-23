@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:touch_grass/config/theme.dart';
 import 'package:touch_grass/models/post_model.dart';
@@ -125,6 +126,11 @@ class PostCard extends StatelessWidget {
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
+                ),
+                const SizedBox(width: 4),
+                IconButton(
+                  icon: const Icon(Icons.comment_outlined),
+                  onPressed: () => context.push('/post/${post.postId}'),
                 ),
                 const Spacer(),
                 _VisibilityBadge(visibility: post.visibility),

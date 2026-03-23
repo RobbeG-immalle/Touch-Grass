@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:touch_grass/models/comment_model.dart';
 import 'package:touch_grass/models/post_model.dart';
 import 'package:touch_grass/models/user_model.dart';
 import 'package:touch_grass/services/database_service.dart';
@@ -151,12 +152,61 @@ class PostsProvider extends ChangeNotifier {
   Future<void> toggleLike(String postId) async {
     final uid = _currentUser?.uid;
     if (uid == null) return;
-    final post = _feed.firstWhere(
-      (p) => p.postId == postId,
-      orElse: () => _userPosts.firstWhere((p) => p.postId == postId),
+
+    PostModel? post;
+    for (final p in _feed) {
+      if (p.postId == postId) { post = p; break; }
+    }
+    post ??= _userPosts.cast<PostModel?>().firstWhere(
+      (p) => p!.postId == postId,
+      orElse: () => _publicPosts.cast<PostModel?>().firstWhere(
+        (p) => p!.postId == postId,
+        orElse: () => null,
+      ),
     );
+    if (post == null) return;
+
     final liked = !post.likedBy.contains(uid);
     await _db.toggleLike(postId, uid, liked);
+  }
+
+  /// Find a post by ID from the local caches.
+  PostModel? findPostById(String postId) {
+    for (final p in _feed) {
+      if (p.postId == postId) return p;
+    }
+    for (final p in _userPosts) {
+      if (p.postId == postId) return p;
+    }
+    for (final p in _publicPosts) {
+      if (p.postId == postId) return p;
+    }
+    return null;
+  }
+
+  /// Real-time stream for a single post.
+  Stream<PostModel?> postStream(String postId) => _db.postStream(postId);
+
+  /// Real-time stream of comments for a post.
+  Stream<List<CommentModel>> commentsStream(String postId) =>
+      _db.commentsStream(postId);
+
+  /// Add a comment to a post.
+  Future<void> addComment({
+    required String postId,
+    required String text,
+  }) async {
+    final uid = _currentUser?.uid;
+    if (uid == null) return;
+    final comment = CommentModel(
+      commentId: '',
+      postId: postId,
+      userId: uid,
+      username: _currentUser?.username ?? '',
+      text: text,
+      createdAt: DateTime.now(),
+    );
+    await _db.addComment(comment);
   }
 
   Future<void> deletePost(String postId, String imageUrl) async {
