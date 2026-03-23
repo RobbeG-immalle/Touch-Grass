@@ -153,17 +153,7 @@ class PostsProvider extends ChangeNotifier {
     final uid = _currentUser?.uid;
     if (uid == null) return;
 
-    PostModel? post;
-    for (final p in _feed) {
-      if (p.postId == postId) { post = p; break; }
-    }
-    post ??= _userPosts.cast<PostModel?>().firstWhere(
-      (p) => p!.postId == postId,
-      orElse: () => _publicPosts.cast<PostModel?>().firstWhere(
-        (p) => p!.postId == postId,
-        orElse: () => null,
-      ),
-    );
+    final post = findPostById(postId);
     if (post == null) return;
 
     final liked = !post.likedBy.contains(uid);
