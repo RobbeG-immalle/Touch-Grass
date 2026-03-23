@@ -49,7 +49,11 @@ class HomeScreen extends StatelessWidget {
                 ),
             ],
           ),
-          if (posts.feed.isEmpty)
+          if (posts.error != null)
+            SliverFillRemaining(
+              child: _FeedError(message: posts.error!),
+            )
+          else if (posts.feed.isEmpty)
             SliverFillRemaining(
               child: _EmptyFeed(),
             )
@@ -77,6 +81,40 @@ class HomeScreen extends StatelessWidget {
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: 0,
         onTap: (i) => _onNavTap(context, i),
+      ),
+    );
+  }
+}
+
+class _FeedError extends StatelessWidget {
+  final String message;
+  const _FeedError({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.orange),
+            const SizedBox(height: 16),
+            Text(
+              'Could not load feed',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: Colors.grey),
+            ),
+          ],
+        ),
       ),
     );
   }
