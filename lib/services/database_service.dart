@@ -105,14 +105,17 @@ class DatabaseService {
     List<Stream<List<PostModel>>> streams,
   ) {
     final controller = StreamController<List<PostModel>>();
-    final latest = List<List<PostModel>>.filled(streams.length, const []);
+    final latest = List<List<PostModel>>.generate(
+      streams.length,
+      (_) => <PostModel>[],
+    );
     final subs = <StreamSubscription<List<PostModel>>>[];
     var activeCount = streams.length;
 
     void emit() {
       final combined = latest.expand((e) => e).toList()
         ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      controller.add(combined);
+      controller.add(combined.take(AppConstants.feedPageSize).toList());
     }
 
     for (var i = 0; i < streams.length; i++) {
