@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class PostModel {
   final String postId;
   final String userId;
+  final String username;
   final String imageUrl;
   final String caption;
   final String visibility;
@@ -16,6 +17,7 @@ class PostModel {
   const PostModel({
     required this.postId,
     required this.userId,
+    this.username = '',
     required this.imageUrl,
     this.caption = '',
     this.visibility = 'friends',
@@ -34,6 +36,7 @@ class PostModel {
     return PostModel(
       postId: doc.id,
       userId: data['userId'] as String? ?? '',
+      username: data['username'] as String? ?? '',
       imageUrl: data['imageUrl'] as String? ?? '',
       caption: data['caption'] as String? ?? '',
       visibility: data['visibility'] as String? ?? 'friends',
@@ -51,6 +54,7 @@ class PostModel {
     return PostModel(
       postId: id,
       userId: data['userId'] as String? ?? '',
+      username: data['username'] as String? ?? '',
       imageUrl: data['imageUrl'] as String? ?? '',
       caption: data['caption'] as String? ?? '',
       visibility: data['visibility'] as String? ?? 'friends',
@@ -68,6 +72,7 @@ class PostModel {
 
   Map<String, dynamic> toFirestore() => {
     'userId': userId,
+    'username': username,
     'imageUrl': imageUrl,
     'caption': caption,
     'visibility': visibility,
@@ -81,6 +86,7 @@ class PostModel {
 
   Map<String, dynamic> toMap() => {
     'userId': userId,
+    'username': username,
     'imageUrl': imageUrl,
     'caption': caption,
     'visibility': visibility,
@@ -95,6 +101,7 @@ class PostModel {
   PostModel copyWith({
     String? postId,
     String? userId,
+    String? username,
     String? imageUrl,
     String? caption,
     String? visibility,
@@ -108,6 +115,7 @@ class PostModel {
     return PostModel(
       postId: postId ?? this.postId,
       userId: userId ?? this.userId,
+      username: username ?? this.username,
       imageUrl: imageUrl ?? this.imageUrl,
       caption: caption ?? this.caption,
       visibility: visibility ?? this.visibility,

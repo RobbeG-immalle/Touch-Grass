@@ -101,6 +101,7 @@ class PostsProvider extends ChangeNotifier {
       final post = PostModel(
         postId: '',
         userId: uid,
+        username: _currentUser?.username ?? '',
         imageUrl: imageUrl,
         caption: caption,
         visibility: visibility,

@@ -41,7 +41,7 @@ class PostCard extends StatelessWidget {
                   radius: 18,
                   backgroundColor: Colors.grey.shade200,
                   child: Text(
-                    post.userId.isNotEmpty ? post.userId[0].toUpperCase() : '?',
+                    post.username.isNotEmpty ? post.username[0].toUpperCase() : (post.userId.isNotEmpty ? post.userId[0].toUpperCase() : '?'),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -50,7 +50,7 @@ class PostCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        post.userId,
+                        post.username.isNotEmpty ? post.username : post.userId,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
