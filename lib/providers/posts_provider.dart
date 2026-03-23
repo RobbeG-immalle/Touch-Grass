@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
@@ -11,6 +12,10 @@ class PostsProvider extends ChangeNotifier {
   final StorageService _storage = StorageService();
 
   UserModel? _currentUser;
+  String? _subscribedUid;
+  StreamSubscription<List<PostModel>>? _feedSub;
+  StreamSubscription<List<PostModel>>? _userPostsSub;
+  StreamSubscription<List<PostModel>>? _publicPostsSub;
   List<PostModel> _feed = [];
   List<PostModel> _userPosts = [];
   List<PostModel> _publicPosts = [];
@@ -24,18 +29,36 @@ class PostsProvider extends ChangeNotifier {
   String? get error => _error;
 
   void updateUser(UserModel? user) {
+    final newUid = user?.uid;
+    if (newUid == _subscribedUid) {
+      _currentUser = user;
+      return;
+    }
     _currentUser = user;
+    _subscribedUid = newUid;
     if (user != null) {
       _subscribeToFeed();
       _subscribeToUserPosts();
+    } else {
+      _feedSub?.cancel();
+      _userPostsSub?.cancel();
+      _publicPostsSub?.cancel();
+      _feedSub = null;
+      _userPostsSub = null;
+      _publicPostsSub = null;
+      _feed = [];
+      _userPosts = [];
+      _publicPosts = [];
+      notifyListeners();
     }
   }
 
   void _subscribeToFeed() {
+    _feedSub?.cancel();
     final user = _currentUser;
     if (user == null) return;
     final ids = [...user.friendIds, user.uid];
-    _db.feedStream(ids).listen(
+    _feedSub = _db.feedStream(ids).listen(
       (posts) {
         _feed = posts;
         _error = null;
@@ -46,9 +69,10 @@ class PostsProvider extends ChangeNotifier {
   }
 
   void _subscribeToUserPosts() {
+    _userPostsSub?.cancel();
     final uid = _currentUser?.uid;
     if (uid == null) return;
-    _db.userPostsStream(uid).listen(
+    _userPostsSub = _db.userPostsStream(uid).listen(
       (posts) {
         _userPosts = posts;
         _error = null;
@@ -59,7 +83,8 @@ class PostsProvider extends ChangeNotifier {
   }
 
   void subscribeToPublicPosts() {
-    _db.publicPostsStream().listen(
+    _publicPostsSub?.cancel();
+    _publicPostsSub = _db.publicPostsStream().listen(
       (posts) {
         _publicPosts = posts;
         _error = null;
