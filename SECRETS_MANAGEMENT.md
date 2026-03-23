@@ -16,6 +16,9 @@ These files are in `.gitignore` and must never be pushed to GitHub:
 - `android/app/*.jks` — Java key store files
 - `local.properties` — Local build settings
 
+### Web Secrets
+- `web/maps_config.js` — Google Maps API key for web (copy from `maps_config.js.template`)
+
 ### Environment & Secrets
 - `.env` — Environment variables (copy from `.env.template` and fill in)
 - `secrets.dart` — Any hardcoded secret Dart file
@@ -83,15 +86,22 @@ import GoogleMaps
 
 **Web Setup:**
 
-Replace `YOUR_API_KEY` in `web/index.html` (placeholder already present):
-
-```html
-<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+1. Copy the template to create your config file:
+```bash
+cp web/maps_config.js.template web/maps_config.js
 ```
+
+2. Open `web/maps_config.js` and replace the placeholder with your key:
+```js
+window._touchGrassEnv.GOOGLE_MAPS_API_KEY = 'AIzaSy...your-key...';
+```
+
+`maps_config.js` is gitignored and will not be committed.
 
 ## Checklist Before Pushing to GitHub
 
 - [ ] `.env` exists locally but is in `.gitignore` ✓
+- [ ] `web/maps_config.js` exists locally but is in `.gitignore` ✓
 - [ ] `lib/firebase_options.dart` is NOT committed (gitignored) ✓
 - [ ] `google-services.json` is NOT committed (gitignored) ✓
 - [ ] `android/key.properties` is NOT committed (gitignored) ✓
@@ -113,11 +123,17 @@ Each developer who clones this repo must:
    # Edit .env and fill in your Google Maps API key
    ```
 
-3. **Android Firebase config:**
+3. **Set up Google Maps for web:**
+   ```bash
+   cp web/maps_config.js.template web/maps_config.js
+   # Edit web/maps_config.js and add your Google Maps API key
+   ```
+
+4. **Android Firebase config:**
    - Download `google-services.json` from Firebase Console → Project Settings → Android App
    - Place it in `android/app/google-services.json` (gitignored)
 
-4. **Build and run:**
+5. **Build and run:**
    ```bash
    flutter clean
    flutter pub get

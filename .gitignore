@@ -31,6 +31,9 @@ GoogleService-Info.plist
 lib/firebase_options.dart
 firebase_options.dart
 
+# Web secrets
+web/maps_config.js
+
 # Environment & secrets
 # Environment & API keys - NEVER commit these!
 .env

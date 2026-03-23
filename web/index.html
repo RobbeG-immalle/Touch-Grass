@@ -32,8 +32,22 @@
   <title>touch_grass</title>
   <link rel="manifest" href="manifest.json">
 
-  <!-- Google Maps JavaScript API — replace YOUR_API_KEY with your actual key -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+  <!-- Google Maps JavaScript API
+       The API key is loaded from maps_config.js (gitignored).
+       Copy maps_config.js.template → maps_config.js and add your key.
+       See SECRETS_MANAGEMENT.md for details. -->
+  <script>window._touchGrassEnv = window._touchGrassEnv || {};</script>
+  <script src="maps_config.js" onerror="console.warn('[Touch Grass] maps_config.js not found. Copy web/maps_config.js.template to web/maps_config.js and add your Google Maps API key. See SECRETS_MANAGEMENT.md.')"></script>
+  <script>
+    (function() {
+      var key = window._touchGrassEnv.GOOGLE_MAPS_API_KEY || '';
+      if (key) {
+        // Use document.write to load synchronously during page parsing,
+        // ensuring the Maps API is available before Flutter bootstraps.
+        document.write('<scr' + 'ipt src="https://maps.googleapis.com/maps/api/js?key=' + key + '"></scr' + 'ipt>');
+      }
+    })();
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

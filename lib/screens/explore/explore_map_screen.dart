@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -5,6 +6,7 @@ import 'package:touch_grass/config/constants.dart';
 import 'package:touch_grass/models/post_model.dart';
 import 'package:touch_grass/providers/posts_provider.dart';
 import 'package:touch_grass/services/location_service.dart';
+import 'package:touch_grass/utils/maps_availability.dart';
 
 class ExploreMapScreen extends StatefulWidget {
   const ExploreMapScreen({super.key});
@@ -17,18 +19,27 @@ class _ExploreMapScreenState extends State<ExploreMapScreen> {
   GoogleMapController? _mapController;
   int _filterDays = 7; // 1 = Today, 7 = Week, 30 = Month
   bool _myLocationEnabled = false;
+  bool _mapsApiAvailable = true;
 
   @override
   void initState() {
     super.initState();
     context.read<PostsProvider>().subscribeToPublicPosts();
     _initLocationPermission();
+    _checkMapsApi();
   }
 
   Future<void> _initLocationPermission() async {
     final enabled = await LocationService().ensurePermission();
     if (!mounted) return;
     setState(() => _myLocationEnabled = enabled);
+  }
+
+  void _checkMapsApi() {
+    final available = isMapsApiAvailable();
+    if (!available && mounted) {
+      setState(() => _mapsApiAvailable = false);
+    }
   }
 
   Set<Marker> _buildMarkers(List<PostModel> posts) {
@@ -53,6 +64,50 @@ class _ExploreMapScreenState extends State<ExploreMapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_mapsApiAvailable) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Explore')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.map_outlined,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Google Maps not configured',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  kIsWeb
+                      ? 'Copy web/maps_config.js.template to '
+                        'web/maps_config.js and add your Google Maps '
+                        'API key, then reload the app.'
+                      : 'Add your Google Maps API key to '
+                        'android/local.properties as MAPS_API_KEY '
+                        'and rebuild the app.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'See SECRETS_MANAGEMENT.md for details.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     final posts = context.watch<PostsProvider>().publicPosts;
 
     return Scaffold(
