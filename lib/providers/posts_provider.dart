@@ -42,10 +42,13 @@ class PostsProvider extends ChangeNotifier {
     } else {
       _feedSub?.cancel();
       _userPostsSub?.cancel();
+      _publicPostsSub?.cancel();
       _feedSub = null;
       _userPostsSub = null;
+      _publicPostsSub = null;
       _feed = [];
       _userPosts = [];
+      _publicPosts = [];
       notifyListeners();
     }
   }
