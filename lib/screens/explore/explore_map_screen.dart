@@ -87,9 +87,9 @@ class _ExploreMapScreenState extends State<ExploreMapScreen> {
                 const SizedBox(height: 8),
                 Text(
                   kIsWeb
-                      ? 'Copy web/maps_config.js.template to '
-                        'web/maps_config.js and add your Google Maps '
-                        'API key, then reload the app.'
+                      ? 'Run:  dart run tool/generate_web_maps_config.dart\n'
+                        'to generate web/maps_config.js from your '
+                        'android/local.properties, then reload the app.'
                       : 'Add your Google Maps API key to '
                         'android/local.properties as MAPS_API_KEY '
                         'and rebuild the app.',

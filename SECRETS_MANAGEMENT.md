@@ -86,17 +86,19 @@ import GoogleMaps
 
 **Web Setup:**
 
-1. Copy the template to create your config file:
+The web build uses the same key from `android/local.properties`. Run the generator script from the project root:
+
+```bash
+dart run tool/generate_web_maps_config.dart
+```
+
+This reads `MAPS_API_KEY` from `android/local.properties` and writes `web/maps_config.js` (gitignored).
+
+Alternatively, you can copy the template and fill it in manually:
 ```bash
 cp web/maps_config.js.template web/maps_config.js
+# then edit web/maps_config.js and set your API key
 ```
-
-2. Open `web/maps_config.js` and replace the placeholder with your key:
-```js
-window._touchGrassEnv.GOOGLE_MAPS_API_KEY = 'AIzaSy...your-key...';
-```
-
-`maps_config.js` is gitignored and will not be committed.
 
 ## Checklist Before Pushing to GitHub
 
@@ -125,9 +127,9 @@ Each developer who clones this repo must:
 
 3. **Set up Google Maps for web:**
    ```bash
-   cp web/maps_config.js.template web/maps_config.js
-   # Edit web/maps_config.js and add your Google Maps API key
+   dart run tool/generate_web_maps_config.dart
    ```
+   This reads `MAPS_API_KEY` from `android/local.properties` and creates `web/maps_config.js`.
 
 4. **Android Firebase config:**
    - Download `google-services.json` from Firebase Console → Project Settings → Android App

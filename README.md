@@ -100,11 +100,11 @@ The key is injected into the manifest automatically via Gradle.
 GMSServices.provideAPIKey("YOUR_API_KEY")
 ```
 
-**Web** — copy the template and add your key:
+**Web** — generate from your existing `local.properties`:
 ```bash
-cp web/maps_config.js.template web/maps_config.js
-# then edit web/maps_config.js and set your API key
+dart run tool/generate_web_maps_config.dart
 ```
+This reads `MAPS_API_KEY` from `android/local.properties` and creates the gitignored `web/maps_config.js`.
 
 ### 5. Run the app
 
