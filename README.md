@@ -89,7 +89,7 @@ flutter pub get
 
 ### 4. Configure Google Maps
 
-**Android** — add your key to `android/app/src/main/AndroidManifest.xml`:
+**Android** — replace `YOUR_API_KEY` in `android/app/src/main/AndroidManifest.xml`:
 ```xml
 <meta-data android:name="com.google.android.geo.API_KEY"
            android:value="YOUR_API_KEY"/>
@@ -98,6 +98,11 @@ flutter pub get
 **iOS** — add your key to `ios/Runner/AppDelegate.swift`:
 ```swift
 GMSServices.provideAPIKey("YOUR_API_KEY")
+```
+
+**Web** — replace `YOUR_API_KEY` in `web/index.html`:
+```html
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
 ```
 
 ### 5. Run the app
