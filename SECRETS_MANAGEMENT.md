@@ -37,7 +37,7 @@ This creates `lib/firebase_options.dart` locally (gitignored).
 - **Each developer runs `flutterfire configure` locally**
 - A template is provided at `firebase_options_template.dart` for reference
 
-### 2. Google Maps API Key (Android/iOS)
+### 2. Google Maps API Key (Android/iOS/Web)
 
 **Local Setup:**
 
@@ -53,7 +53,7 @@ GOOGLE_MAPS_API_KEY=AIzaSy...your-key...
 
 **Android Setup:**
 
-Add the key to `android/app/src/main/AndroidManifest.xml`:
+Replace `YOUR_API_KEY` in `android/app/src/main/AndroidManifest.xml` (placeholder already present):
 
 ```xml
 <meta-data
@@ -79,6 +79,14 @@ import GoogleMaps
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }
+```
+
+**Web Setup:**
+
+Replace `YOUR_API_KEY` in `web/index.html` (placeholder already present):
+
+```html
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
 ```
 
 ## Checklist Before Pushing to GitHub
