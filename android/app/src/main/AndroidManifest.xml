@@ -25,7 +25,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <!-- Google Maps API Key — replace YOUR_API_KEY with your actual key -->
+        <!-- Google Maps API Key — injected from local.properties via Gradle -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
