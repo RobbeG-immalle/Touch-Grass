@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:touch_grass/config/constants.dart';
 import 'package:touch_grass/models/friendship_model.dart';
@@ -66,9 +68,30 @@ class DatabaseService {
     if (friendIds.isEmpty) {
       return Stream.value([]);
     }
+
+    // Firestore whereIn supports at most 30 elements.
+    const whereInLimit = 30;
+
+    if (friendIds.length <= whereInLimit) {
+      return _feedQuery(friendIds);
+    }
+
+    // Split into chunks of 30 and merge the snapshot streams.
+    final chunks = <List<String>>[];
+    for (var i = 0; i < friendIds.length; i += whereInLimit) {
+      chunks.add(
+        friendIds.sublist(i, min(i + whereInLimit, friendIds.length)),
+      );
+    }
+
+    final streams = chunks.map(_feedQuery).toList();
+    return _combinePostStreams(streams);
+  }
+
+  Stream<List<PostModel>> _feedQuery(List<String> ids) {
     return _db
         .collection(AppConstants.postsCollection)
-        .where('userId', whereIn: friendIds)
+        .where('userId', whereIn: ids)
         .orderBy('createdAt', descending: true)
         .limit(AppConstants.feedPageSize)
         .snapshots()
@@ -76,6 +99,46 @@ class DatabaseService {
           (snap) =>
               snap.docs.map((d) => PostModel.fromFirestore(d)).toList(),
         );
+  }
+
+  static Stream<List<PostModel>> _combinePostStreams(
+    List<Stream<List<PostModel>>> streams,
+  ) {
+    final controller = StreamController<List<PostModel>>();
+    final latest = List<List<PostModel>>.filled(streams.length, const []);
+    final subs = <StreamSubscription<List<PostModel>>>[];
+    var activeCount = streams.length;
+
+    void emit() {
+      final combined = latest.expand((e) => e).toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      controller.add(combined);
+    }
+
+    for (var i = 0; i < streams.length; i++) {
+      final index = i;
+      subs.add(
+        streams[index].listen(
+          (posts) {
+            latest[index] = posts;
+            emit();
+          },
+          onError: controller.addError,
+          onDone: () {
+            activeCount--;
+            if (activeCount == 0) controller.close();
+          },
+        ),
+      );
+    }
+
+    controller.onCancel = () {
+      for (final sub in subs) {
+        sub.cancel();
+      }
+    };
+
+    return controller.stream;
   }
 
   Stream<List<PostModel>> publicPostsStream() {
