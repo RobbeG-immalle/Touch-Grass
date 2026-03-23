@@ -41,7 +41,8 @@
   <script>
     (function() {
       var key = window._touchGrassEnv.GOOGLE_MAPS_API_KEY || '';
-      if (key) {
+      // Validate key format (alphanumeric, hyphens, underscores only)
+      if (key && /^[A-Za-z0-9_-]+$/.test(key)) {
         // Use document.write to load synchronously during page parsing,
         // ensuring the Maps API is available before Flutter bootstraps.
         document.write('<scr' + 'ipt src="https://maps.googleapis.com/maps/api/js?key=' + key + '"></scr' + 'ipt>');

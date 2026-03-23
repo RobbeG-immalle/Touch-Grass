@@ -35,11 +35,12 @@ class _ExploreMapScreenState extends State<ExploreMapScreen> {
     setState(() => _myLocationEnabled = enabled);
   }
 
-  void _checkMapsApi() {
-    final available = isMapsApiAvailable();
-    if (!available && mounted) {
-      setState(() => _mapsApiAvailable = false);
-    }
+  Future<void> _checkMapsApi() async {
+    if (isMapsApiAvailable()) return;
+    // The Maps JS API may still be loading; retry once after a short delay.
+    await Future<void>.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+    setState(() => _mapsApiAvailable = isMapsApiAvailable());
   }
 
   Set<Marker> _buildMarkers(List<PostModel> posts) {
