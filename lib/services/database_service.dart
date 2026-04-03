@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:touch_grass/config/constants.dart';
+import 'package:touch_grass/models/comment_model.dart';
 import 'package:touch_grass/models/friendship_model.dart';
 import 'package:touch_grass/models/post_model.dart';
 import 'package:touch_grass/models/user_model.dart';
@@ -204,6 +205,44 @@ class DatabaseService {
 
   Future<void> deletePost(String postId) async {
     await _db.collection(AppConstants.postsCollection).doc(postId).delete();
+  }
+
+  // ── Comments ──────────────────────────────────────────────────────────────
+
+  Stream<List<CommentModel>> commentsStream(String postId) {
+    return _db
+        .collection(AppConstants.postsCollection)
+        .doc(postId)
+        .collection(AppConstants.commentsCollection)
+        .orderBy('createdAt', descending: false)
+        .snapshots()
+        .map(
+          (snap) => snap.docs
+              .map((d) => CommentModel.fromFirestore(d, postId))
+              .toList(),
+        );
+  }
+
+  Future<void> addComment(String postId, CommentModel comment) async {
+    final postRef =
+        _db.collection(AppConstants.postsCollection).doc(postId);
+    final commentRef =
+        postRef.collection(AppConstants.commentsCollection).doc();
+    final batch = _db.batch()
+      ..set(commentRef, comment.toFirestore())
+      ..update(postRef, {'commentCount': FieldValue.increment(1)});
+    await batch.commit();
+  }
+
+  Future<void> deleteComment(String postId, String commentId) async {
+    final postRef =
+        _db.collection(AppConstants.postsCollection).doc(postId);
+    final commentRef =
+        postRef.collection(AppConstants.commentsCollection).doc(commentId);
+    final batch = _db.batch()
+      ..delete(commentRef)
+      ..update(postRef, {'commentCount': FieldValue.increment(-1)});
+    await batch.commit();
   }
 
   // ── Streak ────────────────────────────────────────────────────────────────

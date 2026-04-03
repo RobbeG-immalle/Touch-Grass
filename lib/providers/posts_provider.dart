@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:touch_grass/models/comment_model.dart';
 import 'package:touch_grass/models/post_model.dart';
 import 'package:touch_grass/models/user_model.dart';
 import 'package:touch_grass/services/database_service.dart';
@@ -107,7 +108,7 @@ class PostsProvider extends ChangeNotifier {
   }
 
   Future<bool> createPost({
-    required File imageFile,
+    required List<File> imageFiles,
     required String caption,
     required String visibility,
     double? latitude,
@@ -122,12 +123,12 @@ class PostsProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final imageUrl = await _storage.uploadPostImage(uid, imageFile);
+      final imageUrls = await _storage.uploadPostImages(uid, imageFiles);
       final post = PostModel(
         postId: '',
         userId: uid,
         username: _currentUser?.username ?? '',
-        imageUrl: imageUrl,
+        imageUrls: imageUrls,
         caption: caption,
         visibility: visibility,
         latitude: latitude,
@@ -159,8 +160,34 @@ class PostsProvider extends ChangeNotifier {
     await _db.toggleLike(postId, uid, liked);
   }
 
-  Future<void> deletePost(String postId, String imageUrl) async {
+  Future<void> deletePost(String postId, List<String> imageUrls) async {
     await _db.deletePost(postId);
-    await _storage.deleteFile(imageUrl);
+    for (final url in imageUrls) {
+      await _storage.deleteFile(url);
+    }
+  }
+
+  // ── Comments ──────────────────────────────────────────────────────────────
+
+  Stream<List<CommentModel>> commentsStream(String postId) =>
+      _db.commentsStream(postId);
+
+  Future<void> addComment(String postId, String text) async {
+    final uid = _currentUser?.uid;
+    if (uid == null) return;
+    final comment = CommentModel(
+      commentId: '',
+      postId: postId,
+      userId: uid,
+      username: _currentUser?.username ?? '',
+      text: text.trim(),
+      createdAt: DateTime.now(),
+    );
+    await _db.addComment(postId, comment);
+  }
+
+  Future<void> deleteComment(String postId, String commentId) async {
+    await _db.deleteComment(postId, commentId);
   }
 }
+

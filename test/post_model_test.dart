@@ -17,6 +17,7 @@ void main() {
         locationName: 'Golden Gate Park',
         likes: 42,
         likedBy: ['user_a', 'user_b', 'user_c'],
+        commentCount: 3,
         createdAt: testDate,
       );
 
@@ -26,6 +27,7 @@ void main() {
       expect(restored.postId, equals(original.postId));
       expect(restored.userId, equals(original.userId));
       expect(restored.imageUrl, equals(original.imageUrl));
+      expect(restored.imageUrls, equals(original.imageUrls));
       expect(restored.caption, equals(original.caption));
       expect(restored.visibility, equals(original.visibility));
       expect(restored.latitude, equals(original.latitude));
@@ -33,7 +35,27 @@ void main() {
       expect(restored.locationName, equals(original.locationName));
       expect(restored.likes, equals(original.likes));
       expect(restored.likedBy, equals(original.likedBy));
+      expect(restored.commentCount, equals(original.commentCount));
       expect(restored.createdAt, equals(original.createdAt));
+    });
+
+    test('serializes and deserializes a post with multiple images', () {
+      final original = PostModel(
+        postId: 'multi_post',
+        userId: 'user_xyz',
+        imageUrls: [
+          'https://example.com/img1.jpg',
+          'https://example.com/img2.jpg',
+          'https://example.com/img3.jpg',
+        ],
+        createdAt: testDate,
+      );
+
+      final map = original.toMap();
+      final restored = PostModel.fromMap(map, 'multi_post');
+
+      expect(restored.imageUrls, hasLength(3));
+      expect(restored.imageUrl, equals('https://example.com/img1.jpg'));
     });
 
     test('handles missing optional fields with defaults', () {
@@ -54,6 +76,25 @@ void main() {
       expect(restored.locationName, equals(''));
       expect(restored.likes, equals(0));
       expect(restored.likedBy, isEmpty);
+      expect(restored.commentCount, equals(0));
+    });
+
+    test('legacy single imageUrl is wrapped into imageUrls list', () {
+      // Simulate a Firestore document that only has imageUrl (no imageUrls).
+      final legacyMap = {
+        'userId': 'u1',
+        'username': '',
+        'imageUrl': 'https://example.com/legacy.jpg',
+        'caption': '',
+        'visibility': 'friends',
+        'likes': 0,
+        'likedBy': <String>[],
+        'commentCount': 0,
+        'createdAt': testDate,
+      };
+      final restored = PostModel.fromMap(legacyMap, 'legacy');
+      expect(restored.imageUrls, hasLength(1));
+      expect(restored.imageUrl, equals('https://example.com/legacy.jpg'));
     });
 
     test('hasLocation returns true when lat/lng are set', () {
@@ -108,6 +149,20 @@ void main() {
       expect(updated.postId, equals(base.postId));
     });
 
+    test('copies with updated imageUrls', () {
+      final updated = base.copyWith(imageUrls: [
+        'https://example.com/new1.jpg',
+        'https://example.com/new2.jpg',
+      ]);
+      expect(updated.imageUrls, hasLength(2));
+      expect(updated.imageUrl, equals('https://example.com/new1.jpg'));
+    });
+
+    test('copies with updated commentCount', () {
+      final updated = base.copyWith(commentCount: 7);
+      expect(updated.commentCount, equals(7));
+    });
+
     test('preserves all fields not in copyWith call', () {
       final updated = base.copyWith(caption: 'New caption');
       expect(updated.postId, equals(base.postId));
@@ -140,4 +195,11 @@ void main() {
       expect(post.visibility, equals('public'));
     });
   });
+
+  group('PostModel maxImages', () {
+    test('maxImages constant is 5', () {
+      expect(PostModel.maxImages, equals(5));
+    });
+  });
 }
+

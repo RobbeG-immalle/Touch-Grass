@@ -5,6 +5,7 @@ class AppConstants {
   static const String usersCollection = 'users';
   static const String postsCollection = 'posts';
   static const String friendshipsCollection = 'friendships';
+  static const String commentsCollection = 'comments';
 
   // Visibility options
   static const String visibilityFriends = 'friends';
