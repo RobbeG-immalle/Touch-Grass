@@ -10,11 +10,13 @@ class FriendsProvider extends ChangeNotifier {
   UserModel? _currentUser;
   List<FriendshipModel> _friendships = [];
   List<UserModel> _friends = [];
+  Map<String, UserModel> _pendingUsers = {};
   bool _isLoading = false;
   String? _error;
 
   List<FriendshipModel> get friendships => _friendships;
   List<UserModel> get friends => _friends;
+  Map<String, UserModel> get pendingUsers => _pendingUsers;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -57,6 +59,20 @@ class FriendsProvider extends ChangeNotifier {
         friendUids.map((id) => _db.getUser(id)),
       );
       _friends = users.whereType<UserModel>().toList();
+
+      // Load user info for pending request senders
+      final pending = list.where((f) => f.isPending && f.user2 == uid).toList();
+      final pendingUids = pending.map((f) => f.requestedBy).toSet();
+      final pendingEntries = await Future.wait(
+        pendingUids.map((id) async {
+          final u = await _db.getUser(id);
+          return u != null ? MapEntry(id, u) : null;
+        }),
+      );
+      _pendingUsers = Map.fromEntries(
+        pendingEntries.whereType<MapEntry<String, UserModel>>(),
+      );
+
       notifyListeners();
     });
   }

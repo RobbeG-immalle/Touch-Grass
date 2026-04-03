@@ -16,27 +16,29 @@ import 'package:touch_grass/screens/settings/settings_screen.dart';
 
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
+  static GoRouter? _router;
 
-  static final GoRouter router = GoRouter(
-    navigatorKey: _rootNavigatorKey,
-    initialLocation: '/home',
-    redirect: (context, state) {
-      final auth = context.read<AuthProvider>();
-      final isLoggedIn = auth.isLoggedIn;
-      final isAuthRoute =
-          state.matchedLocation.startsWith('/login') ||
-          state.matchedLocation.startsWith('/register');
+  static GoRouter router(AuthProvider authProvider) {
+    return _router ??= GoRouter(
+      navigatorKey: _rootNavigatorKey,
+      initialLocation: '/home',
+      redirect: (context, state) {
+        final auth = context.read<AuthProvider>();
+        final isLoggedIn = auth.isLoggedIn;
+        final isAuthRoute =
+            state.matchedLocation.startsWith('/login') ||
+            state.matchedLocation.startsWith('/register');
 
-      if (!isLoggedIn && !isAuthRoute) return '/login';
-      if (isLoggedIn && isAuthRoute) return '/home';
-      return null;
-    },
-    refreshListenable: _AuthListenable(),
-    routes: [
-      GoRoute(
-        path: '/login',
-        name: 'login',
-        builder: (_, __) => const LoginScreen(),
+        if (!isLoggedIn && !isAuthRoute) return '/login';
+        if (isLoggedIn && isAuthRoute) return '/home';
+        return null;
+      },
+      refreshListenable: authProvider,
+      routes: [
+        GoRoute(
+          path: '/login',
+          name: 'login',
+          builder: (_, __) => const LoginScreen(),
       ),
       GoRoute(
         path: '/register',
@@ -90,10 +92,4 @@ class AppRouter {
       ),
     ],
   );
-}
-
-/// Bridges [AuthProvider] changes to GoRouter's refresh mechanism.
-class _AuthListenable extends ChangeNotifier {
-  // GoRouter calls redirect on every navigation; using a static redirect
-  // that reads provider state directly is sufficient without a listenable.
-}
+}}

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:touch_grass/config/routes.dart';
 import 'package:touch_grass/config/theme.dart';
+import 'package:touch_grass/providers/auth_provider.dart';
 import 'package:touch_grass/providers/settings_provider.dart';
 
 class TouchGrassApp extends StatelessWidget {
@@ -10,13 +11,14 @@ class TouchGrassApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
+    final auth = context.read<AuthProvider>();
     return MaterialApp.router(
       title: 'Touch Grass',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: settings.themeMode,
-      routerConfig: AppRouter.router,
+      routerConfig: AppRouter.router(auth),
     );
   }
 }

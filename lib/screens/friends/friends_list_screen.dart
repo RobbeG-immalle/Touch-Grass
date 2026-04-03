@@ -146,10 +146,21 @@ class _PendingRequestTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fromUid = friendship.requestedBy;
+    final friends = context.watch<FriendsProvider>();
+    final user = friends.pendingUsers[friendship.requestedBy];
+    final displayName = user != null && user.username.isNotEmpty
+        ? '@${user.username}'
+        : friendship.requestedBy;
     return ListTile(
-      leading: const CircleAvatar(child: Icon(Icons.person_outline)),
-      title: Text('Friend request from $fromUid'),
+      leading: CircleAvatar(
+        backgroundImage: user != null && user.avatarUrl.isNotEmpty
+            ? CachedNetworkImageProvider(user.avatarUrl)
+            : null,
+        child: user == null || user.avatarUrl.isEmpty
+            ? const Icon(Icons.person_outline)
+            : null,
+      ),
+      title: Text('Friend request from $displayName'),
       subtitle: const Text('Wants to be your friend'),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
