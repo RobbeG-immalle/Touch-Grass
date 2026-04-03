@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:touch_grass/config/constants.dart';
+import 'package:touch_grass/models/post_model.dart';
 import 'package:touch_grass/providers/posts_provider.dart';
 import 'package:touch_grass/providers/settings_provider.dart';
 import 'package:touch_grass/services/location_service.dart';
@@ -16,7 +17,7 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
-  File? _image;
+  final List<File> _images = [];
   final _captionCtrl = TextEditingController();
   String _visibility = AppConstants.visibilityFriends;
   bool _includeLocation = false;
@@ -28,8 +29,7 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void initState() {
     super.initState();
-    _visibility =
-        context.read<SettingsProvider>().defaultVisibility;
+    _visibility = context.read<SettingsProvider>().defaultVisibility;
   }
 
   @override
@@ -46,8 +46,12 @@ class _CameraScreenState extends State<CameraScreen> {
       imageQuality: 85,
     );
     if (xFile != null) {
-      setState(() => _image = File(xFile.path));
+      setState(() => _images.add(File(xFile.path)));
     }
+  }
+
+  void _removeImage(int index) {
+    setState(() => _images.removeAt(index));
   }
 
   Future<void> _toggleLocation(bool value) async {
@@ -77,16 +81,16 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> _post() async {
-    if (_image == null) {
+    if (_images.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a photo first')),
+        const SnackBar(content: Text('Please select at least one photo')),
       );
       return;
     }
 
     final posts = context.read<PostsProvider>();
     final ok = await posts.createPost(
-      imageFile: _image!,
+      imageFiles: _images,
       caption: _captionCtrl.text.trim(),
       visibility: _visibility,
       latitude: _includeLocation ? _lat : null,
@@ -110,6 +114,7 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   Widget build(BuildContext context) {
     final posts = context.watch<PostsProvider>();
+    final canAddMore = _images.length < PostModel.maxImages;
 
     return Scaffold(
       appBar: AppBar(
@@ -130,56 +135,12 @@ class _CameraScreenState extends State<CameraScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image picker area
-              GestureDetector(
-                onTap: () => _showImageSourceSheet(),
-                child: Container(
-                  height: 260,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(16),
-                    image: _image != null
-                        ? DecorationImage(
-                            image: FileImage(_image!),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
-                  ),
-                  child: _image == null
-                      ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.add_a_photo_outlined,
-                              size: 48,
-                              color: Colors.grey.shade500,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Tap to add photo',
-                              style: TextStyle(color: Colors.grey.shade600),
-                            ),
-                          ],
-                        )
-                      : Align(
-                          alignment: Alignment.topRight,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.black54,
-                              child: IconButton(
-                                icon: const Icon(
-                                  Icons.edit,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                                onPressed: _showImageSourceSheet,
-                              ),
-                            ),
-                          ),
-                        ),
-                ),
+              // Photo grid
+              _PhotoPickerGrid(
+                images: _images,
+                canAddMore: canAddMore,
+                onAdd: _showImageSourceSheet,
+                onRemove: _removeImage,
               ),
               const SizedBox(height: 16),
 
@@ -287,6 +248,139 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 }
 
+/// Grid that shows selected photos + an "add" tile when under the limit.
+class _PhotoPickerGrid extends StatelessWidget {
+  final List<File> images;
+  final bool canAddMore;
+  final VoidCallback onAdd;
+  final ValueChanged<int> onRemove;
+
+  const _PhotoPickerGrid({
+    required this.images,
+    required this.canAddMore,
+    required this.onAdd,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final totalSlots = images.length + (canAddMore ? 1 : 0);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (images.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              'Photos (${images.length}/${PostModel.maxImages})',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        if (images.isEmpty)
+          // Full-width empty state tile
+          GestureDetector(
+            onTap: onAdd,
+            child: Container(
+              height: 200,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add_a_photo_outlined,
+                    size: 48,
+                    color: Colors.grey.shade500,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Tap to add up to ${PostModel.maxImages} photos',
+                    style: TextStyle(color: Colors.grey.shade600),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 4,
+              mainAxisSpacing: 4,
+            ),
+            itemCount: totalSlots,
+            itemBuilder: (context, i) {
+              if (i < images.length) {
+                return _ImageTile(
+                  file: images[i],
+                  onRemove: () => onRemove(i),
+                );
+              }
+              // "Add more" tile
+              return GestureDetector(
+                onTap: onAdd,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.add_photo_alternate_outlined,
+                    size: 36,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+              );
+            },
+          ),
+      ],
+    );
+  }
+}
+
+class _ImageTile extends StatelessWidget {
+  final File file;
+  final VoidCallback onRemove;
+
+  const _ImageTile({required this.file, required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.file(file, fit: BoxFit.cover),
+        ),
+        Positioned(
+          top: 4,
+          right: 4,
+          child: GestureDetector(
+            onTap: onRemove,
+            child: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: const BoxDecoration(
+                color: Colors.black54,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, size: 16, color: Colors.white),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _SectionLabel extends StatelessWidget {
   final String text;
   const _SectionLabel(this.text);
@@ -301,3 +395,4 @@ class _SectionLabel extends StatelessWidget {
     );
   }
 }
+

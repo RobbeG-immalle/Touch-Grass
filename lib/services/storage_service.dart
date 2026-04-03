@@ -26,6 +26,13 @@ class StorageService {
     return ref.getDownloadURL();
   }
 
+  /// Uploads [files] in parallel and returns a list of download URLs
+  /// in the same order as the input list.
+  Future<List<String>> uploadPostImages(String uid, List<File> files) async {
+    final futures = files.map((f) => uploadPostImage(uid, f));
+    return Future.wait(futures);
+  }
+
   Future<void> _upload(Reference ref, File file) async {
     try {
       await ref.putFile(file);
