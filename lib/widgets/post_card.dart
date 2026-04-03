@@ -257,7 +257,7 @@ class _MultiImageView extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: i == currentIndex
                       ? Colors.white
-                      : Colors.white.withAlpha(128),
+                      : Colors.white.withOpacity(0.5),
                 ),
               ),
             ),
