@@ -77,7 +77,7 @@ class HomeScreen extends StatelessWidget {
         onPressed: () => context.push('/camera'),
         child: const Icon(Icons.camera_alt_rounded),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: 0,
         onTap: (i) => _onNavTap(context, i),

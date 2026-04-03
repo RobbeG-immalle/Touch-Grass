@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 /// The bottom navigation bar used in [HomeScreen].
-/// The center slot (index 2) is reserved for the Camera FAB.
 class AppBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -15,67 +14,48 @@ class AppBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 6,
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          // Left half – two items evenly distributed
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _NavItem(
-                  icon: Icons.home_outlined,
-                  activeIcon: Icons.home,
-                  label: 'Home',
-                  index: 0,
-                  currentIndex: currentIndex,
-                  onTap: onTap,
-                ),
-                _NavItem(
-                  icon: Icons.explore_outlined,
-                  activeIcon: Icons.explore,
-                  label: 'Explore',
-                  index: 1,
-                  currentIndex: currentIndex,
-                  onTap: onTap,
-                ),
-              ],
-            ),
+          _NavItem(
+            icon: Icons.home_outlined,
+            activeIcon: Icons.home,
+            label: 'Home',
+            index: 0,
+            currentIndex: currentIndex,
+            onTap: onTap,
           ),
-          // Spacer for the FAB notch
-          const SizedBox(width: 56),
-          // Right half – three items evenly distributed
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _NavItem(
-                  icon: Icons.local_fire_department_outlined,
-                  activeIcon: Icons.local_fire_department,
-                  label: 'Hot',
-                  index: 2,
-                  currentIndex: currentIndex,
-                  onTap: onTap,
-                ),
-                _NavItem(
-                  icon: Icons.people_outline,
-                  activeIcon: Icons.people,
-                  label: 'Friends',
-                  index: 3,
-                  currentIndex: currentIndex,
-                  onTap: onTap,
-                ),
-                _NavItem(
-                  icon: Icons.person_outline,
-                  activeIcon: Icons.person,
-                  label: 'Profile',
-                  index: 4,
-                  currentIndex: currentIndex,
-                  onTap: onTap,
-                ),
-              ],
-            ),
+          _NavItem(
+            icon: Icons.explore_outlined,
+            activeIcon: Icons.explore,
+            label: 'Explore',
+            index: 1,
+            currentIndex: currentIndex,
+            onTap: onTap,
+          ),
+          _NavItem(
+            icon: Icons.local_fire_department_outlined,
+            activeIcon: Icons.local_fire_department,
+            label: 'Hot',
+            index: 2,
+            currentIndex: currentIndex,
+            onTap: onTap,
+          ),
+          _NavItem(
+            icon: Icons.people_outline,
+            activeIcon: Icons.people,
+            label: 'Friends',
+            index: 3,
+            currentIndex: currentIndex,
+            onTap: onTap,
+          ),
+          _NavItem(
+            icon: Icons.person_outline,
+            activeIcon: Icons.person,
+            label: 'Profile',
+            index: 4,
+            currentIndex: currentIndex,
+            onTap: onTap,
           ),
         ],
       ),
