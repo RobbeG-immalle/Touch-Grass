@@ -6,7 +6,12 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if request.auth != null;
       allow create: if request.auth != null && request.auth.uid == uid;
-      allow update, delete: if request.auth != null && request.auth.uid == uid;
+      allow update: if request.auth != null
+                    && (request.auth.uid == uid
+                        // allow any authenticated user to add/remove themselves in friendIds
+                        || request.resource.data.diff(resource.data).affectedKeys()
+                             .hasOnly(['friendIds']));
+      allow delete: if request.auth != null && request.auth.uid == uid;
     }
 
     // Posts: readable by authenticated users, writable only by the author
