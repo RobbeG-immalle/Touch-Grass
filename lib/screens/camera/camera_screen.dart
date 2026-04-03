@@ -57,13 +57,17 @@ class _CameraScreenState extends State<CameraScreen> {
   Future<void> _toggleLocation(bool value) async {
     if (value) {
       setState(() => _fetchingLocation = true);
-      final pos = await LocationService().getCurrentPosition();
+      final locService = LocationService();
+      final pos = await locService.getCurrentPosition();
       if (pos != null) {
+        final name = await locService.getLocationName(
+          pos.latitude,
+          pos.longitude,
+        );
         setState(() {
           _lat = pos.latitude;
           _lng = pos.longitude;
-          _locationName =
-              '${pos.latitude.toStringAsFixed(3)}, ${pos.longitude.toStringAsFixed(3)}';
+          _locationName = name;
         });
       }
       setState(() {
