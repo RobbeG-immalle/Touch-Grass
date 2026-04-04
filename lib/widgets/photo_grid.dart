@@ -5,8 +5,9 @@ import 'package:touch_grass/models/post_model.dart';
 /// A masonry-style 3-column grid of post images.
 class PhotoGrid extends StatelessWidget {
   final List<PostModel> posts;
+  final void Function(PostModel post)? onPostTap;
 
-  const PhotoGrid({super.key, required this.posts});
+  const PhotoGrid({super.key, required this.posts, this.onPostTap});
 
   @override
   Widget build(BuildContext context) {
@@ -41,24 +42,47 @@ class PhotoGrid extends StatelessWidget {
         mainAxisSpacing: 2,
       ),
       itemCount: posts.length,
-      itemBuilder: (context, i) => _GridItem(post: posts[i]),
+      itemBuilder: (context, i) => _GridItem(
+        post: posts[i],
+        onTap: onPostTap != null ? () => onPostTap!(posts[i]) : null,
+      ),
     );
   }
 }
 
 class _GridItem extends StatelessWidget {
   final PostModel post;
-  const _GridItem({required this.post});
+  final VoidCallback? onTap;
+  const _GridItem({required this.post, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return CachedNetworkImage(
-      imageUrl: post.imageUrl,
-      fit: BoxFit.cover,
-      placeholder: (_, __) => Container(color: Colors.grey.shade200),
-      errorWidget: (_, __, ___) => Container(
-        color: Colors.grey.shade200,
-        child: const Icon(Icons.broken_image),
+    return GestureDetector(
+      onTap: onTap,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          CachedNetworkImage(
+            imageUrl: post.imageUrl,
+            fit: BoxFit.cover,
+            placeholder: (_, __) => Container(color: Colors.grey.shade200),
+            errorWidget: (_, __, ___) => Container(
+              color: Colors.grey.shade200,
+              child: const Icon(Icons.broken_image),
+            ),
+          ),
+          if (post.imageUrls.length > 1)
+            const Positioned(
+              top: 4,
+              right: 4,
+              child: Icon(
+                Icons.collections,
+                color: Colors.white,
+                size: 16,
+                shadows: [Shadow(blurRadius: 4)],
+              ),
+            ),
+        ],
       ),
     );
   }

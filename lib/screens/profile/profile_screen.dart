@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:touch_grass/config/theme.dart';
 import 'package:touch_grass/providers/auth_provider.dart';
 import 'package:touch_grass/providers/posts_provider.dart';
+import 'package:touch_grass/screens/profile/post_detail_screen.dart';
 import 'package:touch_grass/widgets/photo_grid.dart';
 import 'package:touch_grass/widgets/streak_badge.dart';
 
@@ -121,7 +122,17 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           SliverToBoxAdapter(
-            child: PhotoGrid(posts: posts.userPosts),
+            child: PhotoGrid(
+              posts: posts.userPosts,
+              onPostTap: (post) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => PostDetailScreen(post: post),
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),
