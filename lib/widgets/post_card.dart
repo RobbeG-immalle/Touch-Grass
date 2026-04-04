@@ -59,18 +59,18 @@ class _PostCardState extends State<PostCard> {
                 Navigator.pop(ctx);
                 final confirmed = await showDialog<bool>(
                   context: context,
-                  builder: (_) => AlertDialog(
+                  builder: (dialogContext) => AlertDialog(
                     title: const Text('Delete post?'),
                     content: const Text(
                       'This will permanently remove this post and all its images.',
                     ),
                     actions: [
                       TextButton(
-                        onPressed: () => Navigator.pop(context, false),
+                        onPressed: () => Navigator.pop(dialogContext, false),
                         child: const Text('Cancel'),
                       ),
                       TextButton(
-                        onPressed: () => Navigator.pop(context, true),
+                        onPressed: () => Navigator.pop(dialogContext, true),
                         child: const Text(
                           'Delete',
                           style: TextStyle(color: Colors.red),

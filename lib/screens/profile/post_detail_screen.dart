@@ -19,9 +19,16 @@ class PostDetailScreen extends StatelessWidget {
     final isOwner = post.userId == currentUid;
 
     // Find the latest version of the post from the provider (for live updates).
-    final livePost = posts.userPosts.where((p) => p.postId == post.postId).firstOrNull
-        ?? posts.feed.where((p) => p.postId == post.postId).firstOrNull
-        ?? post;
+    PostModel? livePost;
+    for (final p in posts.userPosts) {
+      if (p.postId == post.postId) { livePost = p; break; }
+    }
+    if (livePost == null) {
+      for (final p in posts.feed) {
+        if (p.postId == post.postId) { livePost = p; break; }
+      }
+    }
+    livePost ??= post;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Post')),
