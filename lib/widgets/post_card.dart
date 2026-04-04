@@ -10,6 +10,7 @@ class PostCard extends StatefulWidget {
   final String currentUid;
   final VoidCallback onLike;
   final int? rank;
+  final VoidCallback? onDelete;
 
   const PostCard({
     super.key,
@@ -17,6 +18,7 @@ class PostCard extends StatefulWidget {
     required this.currentUid,
     required this.onLike,
     this.rank,
+    this.onDelete,
   });
 
   @override
@@ -34,6 +36,57 @@ class _PostCardState extends State<PostCard> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) => CommentsSheet(postId: widget.post.postId),
+    );
+  }
+
+  void _showPostMenu(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.delete_outline, color: Colors.red),
+              title: const Text(
+                'Delete post',
+                style: TextStyle(color: Colors.red),
+              ),
+              onTap: () async {
+                Navigator.pop(ctx);
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (dialogContext) => AlertDialog(
+                    title: const Text('Delete post?'),
+                    content: const Text(
+                      'This will permanently remove this post and all its images.',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogContext, false),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogContext, true),
+                        child: const Text(
+                          'Delete',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmed == true) {
+                  widget.onDelete?.call();
+                }
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -112,6 +165,13 @@ class _PostCardState extends State<PostCard> {
                     color: Colors.grey,
                   ),
                 ),
+                if (widget.onDelete != null)
+                  IconButton(
+                    icon: const Icon(Icons.more_vert, size: 20),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () => _showPostMenu(context),
+                  ),
               ],
             ),
           ),
